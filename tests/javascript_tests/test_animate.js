@@ -1,9 +1,26 @@
+<<<<<<< HEAD
 requirejs([
     'underscore',
     'jquery',
     'animationdirector'
 ], function(_, $, AnimationDirector) {
   $(document).ready(function() {
+=======
+/**
+ *
+ * @author Yoshiki Vazquez Baeza
+ * @copyright Copyright 2013, The Emperor Project
+ * @credits Yoshiki Vazquez Baeza
+ * @license BSD
+ * @version 0.9.61
+ * @maintainer Yoshiki Vazquez Baeza
+ * @email yoshiki89@gmail.com
+ * @status Development
+ *
+ */
+
+$(document).ready(function() {
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
 
     // these variables are reused throughout this test suite
     var mappingFileHeaders, mappingFileData, coordinatesData;
@@ -121,6 +138,7 @@ requirejs([
      */
     test('Test constructor', function() {
 
+<<<<<<< HEAD
       var director = new AnimationDirector(mappingFileHeaders, mappingFileData,
                                            coordinatesData, 'DOB', 'Treatment',
                                            10);
@@ -147,6 +165,34 @@ requirejs([
           'metadata category name is set correctly for the trajectory 1');
       equal(director.trajectories[1].metadataCategoryName, 'Fast', 'The' +
           'metadata category name is set correctly for the trajectory 1');
+=======
+        var director = new AnimationDirector(mappingFileHeaders,mappingFileData,
+                                             coordinatesData, 'DOB',
+                                             'Treatment', 8);
+
+        // a quick run through all the properties
+        equal(director.mappingFileHeaders, mappingFileHeaders, 'The mapping '+
+              'file headers are set correctly');
+        equal(director.mappingFileData, mappingFileData, 'The mapping file '+
+              'data is set correctly');
+        equal(director.coordinatesData, coordinatesData, 'The coordinates data'+
+              ' is set correctly');
+        equal(director.gradientCategory, 'DOB', 'The gradientCategory is set'+
+              ' correctly');
+        equal(director.trajectoryCategory, 'Treatment', 'The '+
+              'trajectoryCategory is set correctly');
+        equal(director.minimumDelta, 92, 'The minimum delta is computed'+
+              'correctly');
+        equal(director.maximumTrajectoryLength, 109, 'The maximum trajectory '+
+              'length value is correct');
+        equal(director.currentFrame, -1, 'The current frame is correct');
+        equal(director.trajectories.length, 2, 'The number of trajectories is '+
+              'correct');
+        equal(director.trajectories[0].metadataCategoryName, 'Control', 'The'+
+              'metadata category name is set correctly for the trajectory 1');
+        equal(director.trajectories[1].metadataCategoryName, 'Fast', 'The'+
+              'metadata category name is set correctly for the trajectory 1');
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
 
       // check the trajectories are overall ok -- reason why I added this,
       // because they are not :P
@@ -236,11 +282,32 @@ requirejs([
       throws(
           function() {
             result = new AnimationDirector(mappingFileHeaders, mappingFileData,
+<<<<<<< HEAD
                 'DOB', 'Treatment');
           },
           Error,
           'An error is raised if no the number of frames is not passed'
           );
+=======
+                                           'DOB', 'Treatment');
+            },
+            Error,
+            'An error is raised if no the number of frames is not passed'
+        );
+
+        throws(
+          function (){
+              resul = new AnimationDirector(mappingFileHeaders,
+                                            mappingFileDataShort,
+                                            coordinatesDataShort,
+                                            'DOB', 'Treatment', -11);
+            },
+            Error,
+            'An error is raised if a negative speed is passed.'
+        )
+
+
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
     });
 
     /**
@@ -251,6 +318,7 @@ requirejs([
      */
     test('Test maximum trajectory length method', function() {
 
+<<<<<<< HEAD
       var director = new AnimationDirector(mappingFileHeaders, mappingFileData,
           coordinatesData, 'DOB',
           'Treatment', 1);
@@ -270,6 +338,27 @@ requirejs([
       equal(director.getMaximumTrajectoryLength(), 1,
           'Test for the correct getMaximumTrajectoryLength value to be ' +
           'returned');
+=======
+        var director = new AnimationDirector(mappingFileHeaders, mappingFileData,
+                                             coordinatesData, 'DOB',
+                                             'Treatment', 1);
+        equal(director.getMaximumTrajectoryLength(), 208,
+              'Test for the correct getMaximumTrajectoryLength value to be '+
+              'returned');
+        var director = new AnimationDirector(mappingFileHeaders, mappingFileData,
+                                             coordinatesData, 'DOB',
+                                             'Treatment', 5);
+        equal(director.getMaximumTrajectoryLength(), 122,
+              'Test for the correct getMaximumTrajectoryLength value to be '+
+              'returned');
+        var director = new AnimationDirector(mappingFileHeaders,
+                                             mappingFileData, coordinatesData,
+                                             'DOB', 'LinkerPrimerSequence',
+                                             0.4);
+        equal(director.getMaximumTrajectoryLength(), 352,
+              'Test for the correct getMaximumTrajectoryLength value to be '+
+              'returned');
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
     });
 
     /**
@@ -279,6 +368,7 @@ requirejs([
      *
      */
     test('Test the current frame is updated correctly', function() {
+<<<<<<< HEAD
       var director = new AnimationDirector(mappingFileHeaders,
           mappingFileData, coordinatesData,
           'DOB', 'Treatment', 10);
@@ -292,6 +382,21 @@ requirejs([
       }
       equal(director.currentFrame, 207, 'The current frame is stopped at the' +
           ' maximum trajectory length');
+=======
+        var director = new AnimationDirector(mappingFileHeaders,
+                                             mappingFileData, coordinatesData,
+                                             'DOB', 'Treatment', 1);
+        equal(director.currentFrame, -1, 'The current frame is set correctly');
+        director.updateFrame();
+        equal(director.currentFrame, 0, 'The current frame is set correctly');
+
+        // make sure the value is topped at the maximum trajectory length
+        for (var i = 1; i < 209; i++) {
+            director.updateFrame();
+        }
+        equal(director.currentFrame, 208, 'The current frame is stopped at the'+
+              ' maximum trajectory length');
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
     });
 
     /**

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /** @module trajectory */
 define([
     'underscore'
@@ -85,6 +86,89 @@ define([
     this._generateInterpolatedCoordinates();
 
     return this;
+=======
+/**
+ *
+ * @author Yoshiki Vazquez Baeza
+ * @copyright Copyright 2013, The Emperor Project
+ * @credits Yoshiki Vazquez Baeza
+ * @license BSD
+ * @version 0.9.61
+ * @maintainer Yoshiki Vazquez Baeza
+ * @email yoshiki89@gmail.com
+ * @status Development
+ *
+ */
+
+/**
+ *
+ * @name TrajectoryOfSamples
+ *
+ * @class Represents an ordered set of samples where each sample is indexed by
+ * the sample identifier and the order is as given by their position along the
+ * gradient.
+ *
+ * @property {Array} [sampleNames=Array()] array of sample identifiers.
+ * @property {Array} [gradientPoints=Array()] array of values where each of the
+ * samples exist in.
+ * @property {float} [minimumDelta=float] minimum differential between samples
+ * in the trajectory; the value is computed using the gradientPoints array.
+ * @property {float} [suppliedN=float] minimum number of frames a distance will
+ * have in the gradient.
+ * @property {Array} [interpolatedCoordinates=Array()] array of objects with
+ * the corresponding interpolated x, y and z values. The interpolation
+ * operation takes place between subsequent samples.
+ *
+ */
+
+
+/**
+ *
+ * @name TrajectoryOfSamples
+ *
+ * @class Represents an ordered set of samples and their position in PCoA
+ * space.
+ *
+ * @param {sampleNames} an Array of strings where each string is a sample
+ * identifier.
+ * @param {metadataCategoryName} a string indicating the name of the category
+ * in the mapping file used to generate this trajectory.
+ * @param {gradientPoints} an Array of floating point values where each value
+ * corresponds to the position of the samples in the gradient.
+ * @param {coordinates} an Array of objects with x, y and z properties where
+ * each corresponds to the position of a sample in PCoA space.
+ * @param {minimumDelta} minimum differential between the ordered
+ * gradientPoints this value must be non-zero. Note that this value should be
+ * computed taking into account all the other trajectories that will be
+ * animated together, usually by an AnimationDirector object.
+ * @param {suppliedN} a parameter that will determine how many points should
+ * should be found in the the trajectory.
+ * @param {maxN} maximum number of samples allowed per interpolation interval.
+ *
+ **/
+function TrajectoryOfSamples(sampleNames, metadataCategoryName, gradientPoints,
+                             coordinates, minimumDelta, suppliedN, maxN){
+  this.sampleNames = sampleNames;
+  this.metadataCategoryName = metadataCategoryName;
+
+  // array of the values that samples have through the gradient
+  this.gradientPoints = gradientPoints;
+
+  // the first three axes of the data points
+  this.coordinates = coordinates;
+
+  // minimum distance in the gradient
+  this.minimumDelta = minimumDelta;
+
+  // this value determines how fast the animation will run for now let's use
+  // 5 and stick to it as a good default value; 60 was way too slow
+  this.suppliedN = suppliedN !== undefined ? suppliedN : 5;
+  this.maxN = maxN !== undefined ? maxN : 100;
+
+  if (this.coordinates.length != this.gradientPoints.length) {
+    throw new Error("The number of coordinate points and gradient points is"+
+                    "different, make sure these values are consistent.");
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
   }
 
   /**

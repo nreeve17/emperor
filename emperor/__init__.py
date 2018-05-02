@@ -33,9 +33,13 @@ Functions
 #
 # The full license is in the file LICENSE.md, distributed with this software.
 # ----------------------------------------------------------------------------
+<<<<<<< HEAD
 
 import pkg_resources
 __version__ = pkg_resources.get_distribution('emperor').version  # noqa
+=======
+__version__ = "0.9.61"  # noqa
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
 
 from emperor.core import Emperor
 from emperor._pandas import scatterplot

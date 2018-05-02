@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /** @module draw */
 define(['underscore', 'three'], function(_, THREE) {
   /**
@@ -92,6 +93,45 @@ define(['underscore', 'three'], function(_, THREE) {
     for (var index = 0; index < _trajectory.length; index++) {
       points.push(new THREE.Vector3(_trajectory[index].x,
                   _trajectory[index].y, _trajectory[index].z));
+=======
+/**
+ *
+ * @author Yoshiki Vazquez Baeza
+ * @copyright Copyright 2013, The Emperor Project
+ * @credits Yoshiki Vazquez Baeza
+ * @license BSD
+ * @version 0.9.61
+ * @maintainer Yoshiki Vazquez Baeza
+ * @email yoshiki89@gmail.com
+ * @status Development
+ *
+ */
+
+/**
+ *
+ * @name THREE.EmperorTrajectory
+ *
+ * @class This class represents the internal logic for a linearly interpolated
+ * tube/trajectory in THREE.js the object itself is a subclass of the
+ * THREE.Curve.
+ *
+ * @credits: This answer in StackOverflow helped a lot:
+ * http://stackoverflow.com/a/18580832/379593
+ *
+ */
+THREE.EmperorTrajectory = THREE.Curve.create(
+  function ( points) {
+    this.points = (points == undefined) ? [] : points;
+  },
+
+  function ( t ) {    
+    var points = this.points;
+    var index = ( points.length - 1 ) * t;
+    var floorIndex = Math.floor(index);
+
+    if(floorIndex == points.length-1){
+      return points[floorIndex];
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
     }
 
     path = new THREE.EmperorTrajectory(points);

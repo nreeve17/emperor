@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /** @module utility-functions */
 define(['underscore'], function(_) {
   /**
@@ -20,6 +21,77 @@ define(['underscore'], function(_) {
       else {
         numericPart.push(list[index]);
       }
+=======
+/**
+ *
+ * @author Yoshiki Vazquez Baeza
+ * @copyright Copyright 2013, The Emperor Project
+ * @credits Yoshiki Vazquez Baeza
+ * @license BSD
+ * @version 0.9.61
+ * @maintainer Yoshiki Vazquez Baeza
+ * @email yoshiki89@gmail.com
+ * @status Development
+ *
+ */
+
+
+// http://colorbrewer2.org > qualitative > Number of Data Classes = 12
+// colorbrewer will provide you with two lists of colors, those have been
+// added here
+var colorbrewerDiscrete = ["#8dd3c7", "#ffffb3", "#bebada", "#fb8072",
+    "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd",
+    "#ccebc5", "#ffed6f", /*first list ends here*/
+    "#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c",
+    "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928"];
+// taken from the qiime/colors.py module; a total of 24 colors
+var qiimeDiscrete = [ "#ff0000", "#0000ff", "#f27304", "#008000", "#91278d",
+    "#ffff00", "#7cecf4", "#f49ac2", "#5da09e", "#6b440b", "#808080",
+    "#f79679", "#7da9d8", "#fcc688", "#80c99b", "#a287bf", "#fff899",
+    "#c49c6b", "#c0c0c0", "#ed008a", "#00b6ff", "#a54700", "#808000",
+    "#008080"];
+var k_DiscreteColorMaps = {"discrete-coloring":colorbrewerDiscrete,
+                           "discrete-coloring-qiime":qiimeDiscrete};
+
+// these colors are included in chroma and are the only ones we should
+// use to interpolate through whe coloring in a continuous mode
+var k_CHROMABREWER_MAPS = ['discrete-coloring-qiime', 'discrete-coloring',
+    'OrRd', 'PuBu', 'BuPu', 'Oranges', 'BuGn', 'YlOrBr', 'YlGn', 'Reds',
+    'RdPu', 'Greens', 'YlGnBu', 'Purples', 'GnBu', 'Greys', 'YlOrRd', 'PuRd',
+    'Blues', 'PuBuGn', 'Spectral', 'RdYlGn', 'RdBu', 'PiYG', 'PRGn', 'RdYlBu',
+    'BrBG', 'RdGy', 'PuOr'];
+var k_CHROMABREWER_MAPNAMES = ['Classic QIIME Colors',
+    'Discrete Coloring (Colorbrewer)', 'Orange-Red', 'Purple-Blue',
+    'Blue-Purple', 'Oranges', 'Blue-Green', 'Yellow-Orange-Brown',
+    'Yellow-Green', 'Reds', 'Red-Purple', 'Greens', 'Yellow-Green-Blue',
+    'Purples', 'Green-Blue', 'Greys', 'Yellow-Orange-Red', 'Purple-Red',
+    'Blues', 'Purple-Blue-Green', 'Spectral', 'Red-Yellow-Green', 'Red-Blue',
+    'Pink-Yellow-Green', 'Pink-Red-Green', 'Red-Yellow-Blue',
+    'Brown-Blue-Green', 'Red-Grey', 'Purple-Orange'];
+
+/**
+ *
+ * Sorting function that deals with alpha and numeric elements
+ *
+ * This function takes a list of strings, divides it into two new lists, one
+ * that's alpha-only and one that's numeric only.
+ *
+ * @param {string}  string of taxonomies
+ *
+ * @return a truncated string of taxonomies
+ *
+ */
+function naturalSort(list){
+  var numericPart = [], alphaPart = [], result = [];
+
+  // separate the numeric and the alpha elements of the array
+  for(var index = 0; index < list.length; index++){
+    if(isNaN(parseFloat(list[index]))){
+      alphaPart.push(list[index])
+    }
+    else{
+      numericPart.push(list[index])
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
     }
 
     // ignore casing of the strings, taken from:

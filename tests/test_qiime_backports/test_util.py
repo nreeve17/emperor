@@ -179,7 +179,11 @@ class TopLevelTests(TestCase):
                             test.repeat(2).reshape(-1,2))
         test = [0,0]
         _result = idealfourths(test)
+<<<<<<< HEAD
         self.assertEqual(isnan(_result).all(), True)
+=======
+        self.assertEqual(isnan(_result).all(),True)
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
 
 
 class MetadataMapTests(TestCase):

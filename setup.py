@@ -12,7 +12,11 @@ import sys
 from distutils.core import setup
 from glob import glob
 
+<<<<<<< HEAD
 __version__ = "1.0.0beta13-dev"
+=======
+__version__ = "0.9.61"
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
 __maintainer__ = "Emperor development team"
 __email__ = "yoshiki89@gmail.com"
 
@@ -40,6 +44,7 @@ Vazquez-Baeza Y, Pirrung M, Gonzalez A, Knight R.
 Gigascience. 2013 Nov 26;2(1):16.
 """
 
+<<<<<<< HEAD
 skbio_2 = "scikit-bio >= 0.4.1, < 0.5.0"
 skbio_3 = "scikit-bio >= 0.4.1"
 base = ["numpy >= 1.7", "scipy >= 0.17.0", "click", "pandas",
@@ -53,6 +58,12 @@ all_deps = base + doc + test
 if sys.version_info.major == 3:
     base.remove(skbio_2)
     base.append(skbio_3)
+=======
+base = ["numpy >= 1.7", "qcli", "scikit-bio >= 0.2.1, < 0.3.0"]
+doc = ["Sphinx >= 1.2.2, < 1.6", "sphinx-bootstrap-theme"]
+test = ["nose >= 0.10.1", "pep8", "flake8"]
+all_deps = base + doc + test
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
 
 setup(
     name='emperor',

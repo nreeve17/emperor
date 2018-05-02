@@ -1,9 +1,24 @@
+<<<<<<< HEAD
 requirejs(['jquery', 'underscore', 'util'], function($, _, util) {
   var naturalSort = util.naturalSort, truncateLevel = util.truncateLevel,
   convertXMLToString = util.convertXMLToString,
   escapeRegularExpression = util.escapeRegularExpression,
   cleanHTML = util.cleanHTML;
   $(document).ready(function() {
+=======
+/**
+ *
+ * @author Yoshiki Vazquez Baeza
+ * @copyright Copyright 2013, The Emperor Project
+ * @credits Yoshiki Vazquez Baeza
+ * @license BSD
+ * @version 0.9.61
+ * @maintainer Yoshiki Vazquez Baeza
+ * @email yoshiki89@gmail.com
+ * @status Development
+ *
+ */
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
 
     module('General utilities', {
 

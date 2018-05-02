@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 requirejs(['underscore', 'trajectory'], function(_, trajectory) {
   $(document).ready(function() {
     var TrajectoryOfSamples = trajectory.TrajectoryOfSamples;
@@ -6,6 +7,22 @@ requirejs(['underscore', 'trajectory'], function(_, trajectory) {
       trajectory.getSampleNamesAndDataForSortedTrajectories;
     var distanceBetweenPoints = trajectory.distanceBetweenPoints;
     var linearInterpolation = trajectory.linearInterpolation;
+=======
+/**
+ *
+ * @author Yoshiki Vazquez Baeza
+ * @copyright Copyright 2013, The Emperor Project
+ * @credits Yoshiki Vazquez Baeza
+ * @license BSD
+ * @version 0.9.61
+ * @maintainer Yoshiki Vazquez Baeza
+ * @email yoshiki89@gmail.com
+ * @status Development
+ *
+ */
+
+$(document).ready(function() {
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
 
     // these variables are reused throughout this test suite
     var mappingFileHeaders, mappingFileData, coordinatesData;
@@ -206,6 +223,7 @@ requirejs(['underscore', 'trajectory'], function(_, trajectory) {
      * correctly
      *
      */
+<<<<<<< HEAD
     test('Test _generateInterpolatedCoordinates', function() {
 
       var trajectory;
@@ -296,6 +314,95 @@ requirejs(['underscore', 'trajectory'], function(_, trajectory) {
       deepEqual(trajectory._intervalValues,
           [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3] ,
           'Check the interpolated coordinates are computed correctly');
+=======
+    test("Test _generateInterpolatedCoordinates", function(){
+
+        var trajectory;
+        var expectedInterpolatedCoordinates = [{ "x": 0, "y": 0, "z": 0},
+                                               {"x": 0.06666666666666667, "y": 0.06666666666666667, "z": 0.06666666666666667},
+                                               {"x": 0.13333333333333333, "y": 0.13333333333333333, "z": 0.13333333333333333},
+                                               {"x": 0.2, "y": 0.2, "z": 0.2},
+                                               {"x": 0.26666666666666666, "y": 0.26666666666666666, "z": 0.26666666666666666},
+                                               {"x": 0.3333333333333333, "y": 0.3333333333333333, "z": 0.3333333333333333},
+                                               {"x": 0.4, "y": 0.4, "z": 0.4},
+                                               {"x": 0.4666666666666667, "y": 0.4666666666666667, "z": 0.4666666666666667},
+                                               {"x": 0.5333333333333333, "y": 0.5333333333333333, "z": 0.5333333333333333},
+                                               {"x": 0.6, "y": 0.6, "z": 0.6},
+                                               {"x": 0.6666666666666666, "y": 0.6666666666666666, "z": 0.6666666666666666},
+                                               {"x": 0.7333333333333333, "y": 0.7333333333333333, "z": 0.7333333333333333},
+                                               {"x": 0.8, "y": 0.8, "z": 0.8},
+                                               {"x": 0.8666666666666667, "y": 0.8666666666666667, "z": 0.8666666666666667},
+                                               {"x": 0.9333333333333333, "y": 0.9333333333333333, "z": 0.9333333333333333},
+                                               {"x": 1, "y": 1, "z": 1},
+                                               {"x": 0, "y": 0, "z": 0},
+                                               {"x": -1, "y": -1, "z": -1},
+                                               {"x": -2, "y": -2, "z": -2},
+                                               {"x": -3, "y": -3, "z": -3},
+                                               {"x": -4, "y": -4, "z": -4},
+                                               {"x": -5, "y": -5, "z": -5},
+                                               {"x": -6, "y": -6, "z": -6},
+                                               {"x": -7, "y": -7, "z": -7},
+                                               {"x": -8, "y": -8, "z": -8},
+                                               {"x": -9, "y": -9, "z": -9},
+                                               {"x": -7.8, "y": -7.8, "z": -7.8},
+                                               {"x": -6.6, "y": -6.6, "z": -6.6},
+                                               {"x": -5.4, "y": -5.4, "z": -5.4},
+                                               {"x": -4.2, "y": -4.2, "z": -4.2},
+                                               {"x": -3, "y": -3, "z": -3},
+                                               {"x": -1.8000000000000007, "y": -1.8000000000000007, "z": -1.8000000000000007},
+                                               {"x": -0.5999999999999996, "y": -0.5999999999999996, "z": -0.5999999999999996 }, { "x": 0.5999999999999996, "y": 0.5999999999999996, "z": 0.5999999999999996 }, { "x": 1.799999999999999, "y": 1.799999999999999, "z": 1.799999999999999 }, { "x": 3, "y": 3, "z": 3 }, { "x": 3.3333333333333335, "y": 3.3333333333333335, "z": 3.3333333333333335},
+                                               {"x": 3.6666666666666665, "y": 3.6666666666666665, "z": 3.6666666666666665},
+                                               {"x": 4, "y": 4, "z": 4},
+                                               {"x": 4.333333333333333, "y": 4.333333333333333, "z": 4.333333333333333},
+                                               {"x": 4.666666666666666, "y": 4.666666666666666, "z": 4.666666666666666},
+                                               {"x": 5, "y": 5, "z": 5},
+                                               {"x": 5.333333333333333, "y": 5.333333333333333, "z": 5.333333333333333},
+                                               {"x": 5.666666666666666, "y": 5.666666666666666, "z": 5.666666666666666},
+                                               {"x": 6, "y": 6, "z": 6},
+                                               {"x": 6.333333333333333, "y": 6.333333333333333, "z": 6.333333333333333},
+                                               {"x": 6.666666666666666, "y": 6.666666666666666, "z": 6.666666666666666},
+                                               {"x": 7, "y": 7, "z": 7},
+                                               {"x": 7.333333333333333, "y": 7.333333333333333, "z": 7.333333333333333},
+                                               {"x": 7.666666666666666, "y": 7.666666666666666, "z": 7.666666666666666},
+                                               {"x": 8, "y": 8, "z": 8}];
+        trajectory = new TrajectoryOfSamples(sampleNames, 'Treatment',
+                                             gradientPoints, coordinates, 2,
+                                             10);
+
+        // test the interpolated values and the interval values
+        deepEqual(trajectory.interpolatedCoordinates,
+                  expectedInterpolatedCoordinates,
+                  'Check the interpolated coordinates are computed correctly');
+        deepEqual(trajectory._intervalValues, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2,
+                  2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  'Check the intervals array is created properyl');
+
+        expectedInterpolatedCoordinates = [{"x": 0, "y": 0, "z": 0},
+                                           {"x": 0.25, "y": 0.25, "z": 0.25},
+                                           {"x": 0.5, "y": 0.5, "z": 0.5},
+                                           {"x": 0.75, "y": 0.75, "z": 0.75},
+                                           {"x": 1, "y": 1, "z": 1},
+                                           {"x": -2.3333333333333335, "y": -2.3333333333333335, "z": -2.3333333333333335},
+                                           {"x": -5.666666666666667, "y": -5.666666666666667, "z": -5.666666666666667},
+                                           {"x": -9, "y": -9, "z": -9},
+                                           {"x": -5, "y": -5, "z": -5},
+                                           {"x": -1, "y": -1, "z": -1},
+                                           {"x": 3, "y": 3, "z": 3},
+                                           {"x": 4.25, "y": 4.25, "z": 4.25},
+                                           {"x": 5.5, "y": 5.5, "z": 5.5},
+                                           {"x": 6.75, "y": 6.75, "z": 6.75},
+                                           {"x": 8, "y": 8, "z": 8 }];
+        trajectory = new TrajectoryOfSamples(sampleNames, 'Treatment',
+                                             gradientPoints, coordinates, 2,
+                                             3);
+        deepEqual(trajectory.interpolatedCoordinates,
+                  expectedInterpolatedCoordinates,
+                  'Check the interpolated coordinates are computed correctly');
+        deepEqual(trajectory._intervalValues,
+                  [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3] ,
+                  'Check the interpolated coordinates are computed correctly');
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
     });
 
     /**

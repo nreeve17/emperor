@@ -16,15 +16,33 @@ The :ref:`genindex` lists the contents of this documentation.
 
    emperor_objects
 
+<<<<<<< HEAD
 General Documentation:
 ======================
+=======
+Animations:
+===========
+
+.. toctree::
+   :maxdepth: 1
+
+   tutorials/animations
+
+Scripts:
+========
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
 
 .. toctree::
    :maxdepth: 2
 
+<<<<<<< HEAD
    description
    examples
    formats
+=======
+   scripts/make_emperor
+   tutorials/animations
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
 
 Animations:
 ===========

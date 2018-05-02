@@ -156,7 +156,11 @@
         if (page) {
             page.close();
         }
+<<<<<<< HEAD
         setTimeout(function() {
+=======
+        setTimeout(function () {
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
             phantom.exit(code);
         }, 0);
     }

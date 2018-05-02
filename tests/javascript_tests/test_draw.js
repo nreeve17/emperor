@@ -1,8 +1,23 @@
+<<<<<<< HEAD
 requirejs(['draw'], function(draw) {
   var formatSVGLegend = draw.formatSVGLegend;
   var makeLine = draw.makeLine;
   var makeLabel = draw.makeLabel;
   $(document).ready(function() {
+=======
+/**
+ *
+ * @author Yoshiki Vazquez Baeza
+ * @copyright Copyright 2013, The Emperor Project
+ * @credits Yoshiki Vazquez Baeza
+ * @license BSD
+ * @version 0.9.61
+ * @maintainer Yoshiki Vazquez Baeza
+ * @email yoshiki89@gmail.com
+ * @status Development
+ *
+ */
+>>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
 
     module('Drawing utilities', {
 
