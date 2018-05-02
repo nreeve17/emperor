@@ -23,6 +23,7 @@ define([
             ShapeController, AxesController, ScaleViewController,
             AnimationsController, FileSaver, viewcontroller, SVGRenderer, Draw,
             CanvasRenderer, canvasToBlob) {
+  var EmperorAttributeABC = viewcontroller.EmperorAttributeABC;
 
   /**
    *
@@ -32,8 +33,10 @@ define([
    * The application controller, contains all the information on how the model
    * is being presented to the user.
    *
-   * @param {DecompositionModel} dm An object that will be represented on
-   * screen.
+   * @param {DecompositionModel} scatter A decomposition object that represents
+   * the scatter-represented objects.
+   * @param {DecompositionModel} biplot An optional decomposition object that
+   * represents the arrow-represented objects. Can be null or undefined.
    * @param {string} divId The element id where the controller should
    * instantiate itself.
    * @param {node} [webglcanvas = undefined] the canvas to use to render the
@@ -44,7 +47,7 @@ define([
    * @constructs EmperorController
    *
    */
-  function EmperorController(dm, divId, webglcanvas) {
+  function EmperorController(scatter, biplot, divId, webglcanvas) {
     var scope = this;
 
     /**
@@ -74,11 +77,18 @@ define([
      */
     this.height = this.$divId.height();
 
+
     /**
-     * Ordination data being plotted.
-     * @type {DecompositionModel}
+     * Object with all the available decomposition views.
+     *
+     * @type {object}
      */
-    this.dm = dm;
+    this.decViews = {'scatter': new DecompositionView(scatter)};
+
+    if (biplot) {
+      this.decViews.biplot = new DecompositionView(biplot);
+    }
+
     /**
      * List of the scene plots views being rendered.
      * @type {ScenePlotView3D[]}
@@ -150,6 +160,22 @@ define([
     this.renderer.sortObjects = true;
     this.$plotSpace.append(this.renderer.domElement);
 
+
+    /**
+     * The number of tabs that we expect to see. This attribute is updated by
+     * the addTab method, and is only releveant during the initialization
+     * process.
+     * @private
+     */
+    this._expected = 0;
+
+    /**
+     * The number of tabs that have finished initalization. This attribute is
+     * only relevant during the initialization process.
+     * @private
+     */
+    this._seen = 0;
+
     /**
      * Menu tabs containers, note that we need them in this format to have
      * jQuery's UI tabs work properly. All the view controllers will be added
@@ -174,19 +200,33 @@ define([
     this._$tabsContainer.append(this._$tabsList);
 
     /**
-     * Object with all the available decomposition views.
+     * @type {Node}
+     * jQuery object To show the context menu (as an alternative to
+     * right-clicking on the plot).
      *
-     * FIXME: This is a hack to go around the fact that the constructor takes
-     * a single decomposition model instead of a dictionary
-     *
-     * @type {object}
+     * The context menu that this button shows is created in the _buildUI
+     * method.
      */
-    this.decViews = {'scatter': new DecompositionView(this.dm)};
+    this.$optionsButton = $('<button name="options-button">&nbsp;</button>');
+    this.$optionsButton.css({
+      'position': 'absolute',
+      'z-index': '3',
+      'top': '5px',
+      'right': '5px'
+    }).attr('title', 'More Options').on('click', function(event) {
+      // add offset to avoid overlapping the button with the menu
+      scope.$plotSpace.contextMenu({x: event.pageX, y: event.pageY + 5});
+    });
+    this.$plotSpace.append(this.$optionsButton);
 
     // default decomposition view uses the full window
     this.addSceneView();
 
     $(function() {
+      // setup the jquery properties of the button
+      scope.$optionsButton.button({text: false,
+                                   icons: {primary: ' ui-icon-gear'}});
+
       scope._buildUI();
       // Hide the loading splashscreen
       scope.$divId.find('.loading').hide();
@@ -210,7 +250,9 @@ define([
             scope.resize(scope.width, scope.height);
           }, 50);
         }
-      }).dblclick(function() {
+      });
+
+      scope.$plotMenu.find('.ui-resizable-handle').dblclick(function() {
         var percent = (scope.$plotSpace.width() / scope.width) * 100;
 
         // allow for a bit of leeway
@@ -418,7 +460,7 @@ define([
    */
   EmperorController.prototype.updatePlotBanner = function() {
     var color = this.sceneViews[0].scene.background.clone(), visible = 0,
-        total = 0;
+        total = 0, message = '';
 
     // invert the color so it's visible regardless of the background
     color.setRGB((Math.floor(color.r * 255) ^ 0xFF) / 255,
@@ -435,7 +477,13 @@ define([
     });
 
     this.$plotBanner.css({'color': color, 'border-color': color});
-    this.$plotBanner.html(visible + '/' + total + ' visible');
+
+    if (visible !== total) {
+      message = ' <br> WARNING: hiding samples in an ordination can be ' +
+                'misleading';
+    }
+
+    this.$plotBanner.html(visible + '/' + total + ' visible' + message);
   };
 
   EmperorController.prototype.getPlotBanner = function(text) {
@@ -471,11 +519,6 @@ define([
   EmperorController.prototype._buildUI = function() {
     var scope = this;
 
-    // this is the number of expected view controllers that will announce that
-    // all view controllers have been successfully loaded.
-    this._expected = 4;
-    this._seen = 0;
-
     //FIXME: This only works for 1 scene plot view
     this.controllers.color = this.addTab(this.sceneViews[0].decViews,
                                          ColorViewController);
@@ -484,7 +527,7 @@ define([
     this.controllers.opacity = this.addTab(this.sceneViews[0].decViews,
                                            OpacityViewController);
     this.controllers.scale = this.addTab(this.sceneViews[0].decViews,
-        ScaleViewController);
+                                         ScaleViewController);
     this.controllers.shape = this.addTab(this.sceneViews[0].decViews,
                                          ShapeController);
     this.controllers.axes = this.addTab(this.sceneViews[0].decViews,
@@ -645,7 +688,7 @@ define([
     }
     else if (type === 'svg') {
       // confirm box based on number of samples: better safe than sorry
-      if (this.dm.length >= 9000) {
+      if (this.decViews.scatter.decomp.length >= 9000) {
         if (confirm('This number of samples could take a long time and in ' +
            'some computers the browser will crash. If this happens we ' +
            'suggest to use the png implementation. Do you want to ' +
@@ -791,7 +834,7 @@ define([
 
   /**
    *
-   * Helper method to resize the plots.
+   * Helper method to add tabs to the controller.
    *
    * @param {DecompositionView[]} dvdict Dictionary of DecompositionViews.
    * @param {EmperorViewControllerABC} viewConstructor Constructor of the view
@@ -800,6 +843,7 @@ define([
    */
   EmperorController.prototype.addTab = function(dvdict, viewConstructor) {
     var scope = this;
+    this._expected += 1;
 
     // nothing but a temporary id
     var id = (Math.round(1000000 * Math.random())).toString(), $li;

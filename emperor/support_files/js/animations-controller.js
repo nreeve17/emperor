@@ -151,6 +151,16 @@ define([
                             }});
       scope.$radius.css('background', '#70caff');
 
+      // once this element is ready, it is safe to execute the "ready" callback
+      // if a subclass needs to wait on other elements, this attribute should
+      // be changed to null so this callback is effectively cancelled, for an
+      // example see the constructor of ColorViewController
+      scope.$trajectorySelect.on('chosen:ready', function() {
+        if (scope.ready !== null) {
+          scope.ready();
+        }
+      });
+
       // setup chosen
       scope.$gradientSelect.chosen({
         width: '100%',
@@ -354,9 +364,11 @@ define([
 
     this.$speed.slider('option', 'disabled', !speed);
     this.$radius.slider('option', 'disabled', !speed);
-    this.$play.prop('disabled', !play);
-    this.$pause.prop('disabled', !pause);
-    this.$rewind.prop('disabled', !rewind);
+
+    // jquery ui requires a manual refresh of to the UI after state changes
+    this.$play.prop('disabled', !play).button('refresh');
+    this.$pause.prop('disabled', !pause).button('refresh');
+    this.$rewind.prop('disabled', !rewind).button('refresh');
 
     this._grid.setOptions({editable: speed});
   };
@@ -548,7 +560,7 @@ define([
       // buttons and re-enable the rewind button so users can clear the
       // screen.
       this._updateButtons();
-      this.$rewind.prop('disabled', false);
+      this.$rewind.prop('disabled', false).button('refresh');
     }
   };
 

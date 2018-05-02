@@ -285,6 +285,12 @@ define([
       for (j = 0; j < this.decViews[decViewName].ellipsoids.length; j++) {
         this.scene.add(this.decViews[decViewName].ellipsoids[j]);
       }
+
+      // if the left lines exist so will the right lines
+      if (this.decViews[decViewName].lines.left) {
+        this.scene.add(this.decViews[decViewName].lines.left);
+        this.scene.add(this.decViews[decViewName].lines.right);
+      }
     }
 
     this.needsUpdate = true;
@@ -477,15 +483,13 @@ define([
    *
    */
   ScenePlotView3D.prototype.drawAxesLabelsWithColor = function(color) {
-    var scope = this, axisLabel, decomp, firstKey, text, factor;
+    var scope = this, axisLabel, decomp, firstKey, text;
 
     // the labels are only removed if the color is null
     this.removeAxesLabels();
     if (color === null) {
       return;
     }
-
-    factor = (this.dimensionRanges.max[0] - this.dimensionRanges.min[0]) * 0.9;
 
     // get the first decomposition object, it doesn't really mater which one
     // we look at though, as all of them should have the same percentage
@@ -508,7 +512,7 @@ define([
         text += ' (' + decomp.percExpl[index].toPrecision(4) + ' %)';
       }
 
-      axisLabel = makeLabel(end, text, color, factor);
+      axisLabel = makeLabel(end, text, color);
       axisLabel.name = scope._axisLabelPrefix + index;
 
       scope.scene.add(axisLabel);
@@ -685,10 +689,13 @@ define([
       this.control.update();
     }
 
-    //point all samples towards the camera
-    _.each(this.decViews.scatter.markers, function(element) {
-      element.quaternion.copy(camera.quaternion);
-    });
+    // only scatter types should be pointed towards the camera, for arrow types
+    // this will result in a very odd visual effect
+    if (this.decViews.scatter.decomp.isScatterType()) {
+      _.each(this.decViews.scatter.markers, function(element) {
+        element.quaternion.copy(camera.quaternion);
+      });
+    }
 
     this.needsUpdate = false;
     $.each(this.decViews, function(key, val) {
@@ -718,8 +725,14 @@ define([
 
     this._raycaster.setFromCamera(this._mouse, this.camera);
 
-    var intersects = this._raycaster.intersectObjects(
-      this.decViews.scatter.markers);
+    // get a flattened array of markers
+    var objects = _.map(this.decViews, function(decomp) {
+      return decomp.markers;
+    });
+    objects = _.reduce(objects, function(memo, value) {
+      return memo.concat(value);
+    }, []);
+    var intersects = this._raycaster.intersectObjects(objects);
 
     // Get first intersected item and call callback with it.
     if (intersects.length > 0) {

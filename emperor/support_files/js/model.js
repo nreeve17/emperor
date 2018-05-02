@@ -129,8 +129,16 @@ function($, _, util) {
    * @constructs DecompositionModel
    *
    */
-  function DecompositionModel(data, md_headers, metadata) {
+  function DecompositionModel(data, md_headers, metadata, type) {
     var coords = data.coordinates, ci = data.ci || [];
+
+    /**
+     *
+     * Model's type of the data, can be either 'scatter' or 'arrow'
+     * @type {string}
+     *
+     */
+    this.type = type || 'scatter';
 
     var num_coords;
     /**
@@ -248,10 +256,11 @@ function($, _, util) {
     // file format, see https://github.com/biocore/emperor/issues/562
     this._fixAxesNames();
 
-    // TODO:
-    // this.edges = [];
-    // this.plotEdge = false;
-    // this.serialComparison = false;
+    /**
+     * Array of pairs of Plottable objects.
+     * @type {Array[]}
+     */
+    this.edges = this._processEdgeList(data.edges || []);
   }
 
   /**
@@ -370,6 +379,24 @@ function($, _, util) {
 
   /**
    *
+   * Method to determine if this is an arrow decomposition
+   *
+   */
+  DecompositionModel.prototype.isArrowType = function() {
+    return this.type === 'arrow';
+  };
+
+  /**
+   *
+   * Method to determine if this is a scatter decomposition
+   *
+   */
+  DecompositionModel.prototype.isScatterType = function() {
+    return this.type === 'scatter';
+  };
+
+  /**
+   *
    * Executes the provided `func` passing all the plottables as parameters.
    *
    * @param {function} func The function to call for each plottable. It should
@@ -381,6 +408,35 @@ function($, _, util) {
    */
   DecompositionModel.prototype.apply = function(func) {
     return _.map(this.plottable, func);
+  };
+
+  /**
+   *
+   * Transform observation names into plottable objects.
+   *
+   * @return {Array[]} An array of plottable pairs.
+   * @private
+   *
+   */
+  DecompositionModel.prototype._processEdgeList = function(edges) {
+    if (edges.length === 0) {
+      return edges;
+    }
+
+    var u, v, scope = this;
+    edges = edges.map(function(edge) {
+      if (edge[0] === edge[1]) {
+        throw new Error('Cannot create edge between two identical nodes (' +
+                        edge[0] + ' and ' + edge[1] + ')');
+      }
+
+      u = scope.getPlottableByID(edge[0]);
+      v = scope.getPlottableByID(edge[1]);
+
+      return [u, v];
+    });
+
+    return edges;
   };
 
   /**
@@ -397,7 +453,7 @@ function($, _, util) {
    * of the newly seen plottable object.
    * @private
    *
-   **/
+   */
   DecompositionModel._minMaxReduce = function(accumulator, plottable) {
 
     // iterate over every dimension
@@ -421,7 +477,9 @@ function($, _, util) {
    * scikit-bio. In both cases, if we have an abbreviated name, we will use
    * that string as a prefix for the axes names.
    *
-   **/
+   * @private
+   *
+   */
   DecompositionModel.prototype._fixAxesNames = function() {
     var expected = [], replacement = [], prefix, names, cast, i;
 

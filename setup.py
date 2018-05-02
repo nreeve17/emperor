@@ -13,10 +13,14 @@ from distutils.core import setup
 from glob import glob
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 __version__ = "1.0.0beta13-dev"
 =======
 __version__ = "0.9.61"
 >>>>>>> 32f0c53e72a9543ffd3a6edb1b8772d5ca73def1
+=======
+__version__ = "1.0.0beta16"
+>>>>>>> 41268ab7fa575c530591e254dda4e5051a5670d4
 __maintainer__ = "Emperor development team"
 __email__ = "yoshiki89@gmail.com"
 

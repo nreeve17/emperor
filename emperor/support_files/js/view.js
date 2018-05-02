@@ -2,8 +2,11 @@ define([
     'jquery',
     'underscore',
     'three',
-    'shapes'
-], function($, _, THREE, shapes) {
+    'shapes',
+    'draw'
+], function($, _, THREE, shapes, draw) {
+  var makeArrow = draw.makeArrow;
+  var makeLineCollection = draw.makeLineCollection;
 /**
  *
  * @class DecompositionView
@@ -64,15 +67,17 @@ function DecompositionView(decomp) {
    * @type {THREE.Mesh[]}
    */
   this.markers = [];
-
-  this.ellipsoids = [];
-
   /**
-   * Array of line objects shown on screen (used for procustes and vector
-   * plots).
-   * @type {THREE.Line[]}
+   * Array of THREE.Mesh objects on screen (represent confidence intervals).
+   * @type {THREE.Mesh[]}
    */
-  this.lines = [];
+  this.ellipsoids = [];
+  /**
+   * Object with THREE.LineSegments for the procrustes edges. Has a left and
+   * a right attribute.
+   * @type {Object}
+   */
+  this.lines = {'left': null, 'right': null};
 
   // setup this.markers and this.lines
   this._initBaseView();
@@ -101,40 +106,75 @@ DecompositionView.prototype._initBaseView = function() {
 
   hasConfidenceIntervals = this.decomp.hasConfidenceIntervals();
 
-  this.decomp.apply(function(plottable) {
-    mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial());
-    mesh.name = plottable.name;
+  if (this.decomp.isScatterType()) {
+    this.decomp.apply(function(plottable) {
+      mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial());
+      mesh.name = plottable.name;
 
-    mesh.material.color = new THREE.Color(0xff0000);
-    mesh.material.transparent = false;
-    mesh.material.depthWrite = true;
-    mesh.material.opacity = 1;
-    mesh.matrixAutoUpdate = true;
+      mesh.material.color = new THREE.Color(0xff0000);
+      mesh.material.transparent = false;
+      mesh.material.depthWrite = true;
+      mesh.material.opacity = 1;
+      mesh.matrixAutoUpdate = true;
 
-    mesh.position.set(plottable.coordinates[x], plottable.coordinates[y],
-                      plottable.coordinates[z]);
+      mesh.position.set(plottable.coordinates[x], plottable.coordinates[y],
+                        plottable.coordinates[z]);
 
-    scope.markers.push(mesh);
+      scope.markers.push(mesh);
 
-    if (hasConfidenceIntervals) {
-      // copy the current sphere and make it an ellipsoid
-      mesh = mesh.clone();
+      if (hasConfidenceIntervals) {
+        // copy the current sphere and make it an ellipsoid
+        mesh = mesh.clone();
 
-      mesh.name = plottable.name + '_ci';
-      mesh.material.transparent = true;
-      mesh.material.opacity = 0.5;
+        mesh.name = plottable.name + '_ci';
+        mesh.material.transparent = true;
+        mesh.material.opacity = 0.5;
 
-      mesh.scale.set(plottable.ci[x] / geometry.parameters.radius,
-                     plottable.ci[y] / geometry.parameters.radius,
-                     plottable.ci[z] / geometry.parameters.radius);
+        mesh.scale.set(plottable.ci[x] / geometry.parameters.radius,
+                       plottable.ci[y] / geometry.parameters.radius,
+                       plottable.ci[z] / geometry.parameters.radius);
 
-      scope.ellipsoids.push(mesh);
-    }
-  });
+        scope.ellipsoids.push(mesh);
+      }
+    });
+  }
+  else if (this.decomp.isArrowType()) {
+    var arrow, zero = [0, 0, 0], point;
 
-  // apply but to the adjacency list NOT IMPLEMENTED
-  // this.decomp.applyAJ( ... ); Blame Jamie and Jose - baby steps buddy...
+    this.decomp.apply(function(plottable) {
+      point = [plottable.coordinates[x],
+               plottable.coordinates[y],
+               plottable.coordinates[z]];
+      arrow = makeArrow(zero, point, 0xc0c0c0, plottable.name);
 
+      scope.markers.push(arrow);
+    });
+  }
+  else {
+    throw 'Unsupported decomposition type';
+  }
+
+  if (this.decomp.edges.length) {
+    var left, center, right, u, v, verticesLeft = [], verticesRight = [];
+    this.decomp.edges.forEach(function(edge) {
+      u = edge[0];
+      v = edge[1];
+
+      // remember x, y and z
+      center = [(u.coordinates[x] + v.coordinates[x]) / 2,
+                (u.coordinates[y] + v.coordinates[y]) / 2,
+                (u.coordinates[z] + v.coordinates[z]) / 2];
+
+      left = [u.coordinates[x], u.coordinates[y], u.coordinates[z]];
+      right = [v.coordinates[x], v.coordinates[y], v.coordinates[z]];
+
+      verticesLeft.push(left, center);
+      verticesRight.push(right, center);
+    });
+
+    this.lines.left = makeLineCollection(verticesLeft, 0xffffff);
+    this.lines.right = makeLineCollection(verticesRight, 0xff0000);
+  }
 };
 
 /**
@@ -151,6 +191,120 @@ DecompositionView.prototype.getVisibleCount = function() {
   }, 0);
 
   return visible;
+};
+
+/**
+ *
+ * Update the position of the markers, arrows and lines.
+ *
+ * This method is called by flipVisibleDimension and by changeVisibleDimensions
+ * and will naively change the positions even if they haven't changed.
+ *
+ */
+DecompositionView.prototype.updatePositions = function() {
+  var x = this.visibleDimensions[0], y = this.visibleDimensions[1],
+      z = this.visibleDimensions[2], scope = this, hasConfidenceIntervals,
+      radius = 0, is2D = (z === null);
+
+  hasConfidenceIntervals = this.decomp.hasConfidenceIntervals();
+
+  // we need the original radius to scale confidence intervals (if they exist)
+  if (hasConfidenceIntervals) {
+    radius = scope.ellipsoids[0].geometry.parameters.radius;
+  }
+
+  if (this.decomp.isScatterType()) {
+    this.decomp.apply(function(plottable) {
+      mesh = scope.markers[plottable.idx];
+
+      // always use the original data plus the axis orientation
+      mesh.position.set(
+        plottable.coordinates[x] * scope.axesOrientation[0],
+        plottable.coordinates[y] * scope.axesOrientation[1],
+        (is2D ? 0 : plottable.coordinates[z]) * scope.axesOrientation[2]);
+      mesh.updateMatrix();
+
+      if (hasConfidenceIntervals) {
+        mesh = scope.ellipsoids[plottable.idx];
+
+        mesh.position.set(
+          plottable.coordinates[x] * scope.axesOrientation[0],
+          plottable.coordinates[y] * scope.axesOrientation[1],
+          (is2D ? 0 : plottable.coordinates[z]) * scope.axesOrientation[2]);
+
+        // flatten the ellipsoids ever so slightly
+        mesh.scale.set(plottable.ci[x] / radius, plottable.ci[y] / radius,
+                       is2D ? 0.01 : plottable.ci[z] / radius);
+
+        mesh.updateMatrix();
+      }
+    });
+  }
+  else if (this.decomp.isArrowType()) {
+    var target, arrow;
+
+    this.decomp.apply(function(plottable) {
+      arrow = scope.markers[plottable.idx];
+
+      target = new THREE.Vector3(
+        plottable.coordinates[x] * scope.axesOrientation[0],
+        plottable.coordinates[y] * scope.axesOrientation[1],
+        (is2D ? 0 : plottable.coordinates[z]) * scope.axesOrientation[2]);
+
+      arrow.setPointsTo(target);
+    });
+  }
+
+  // edges are made using THREE.LineSegments and a buffer geometry so updating
+  // the position takes a bit more work but these objects will render faster
+  if (this.decomp.edges.length) {
+    this._redrawEdges();
+  }
+  this.needsUpdate = true;
+};
+
+
+/**
+ *
+ * Internal method to draw edges for plottables
+ *
+ * @param {Plottable[]} plottables An array of plottables for which the edges
+ * should be redrawn. If this object is not supplied, all the edges are drawn.
+ */
+DecompositionView.prototype._redrawEdges = function(plottables) {
+  var u, v, j = 0, left = [], right = [];
+  var x = this.visibleDimensions[0], y = this.visibleDimensions[1],
+      z = this.visibleDimensions[2], scope = this,
+      is2D = (z === null), drawAll = (plottables === undefined);
+
+  this.decomp.edges.forEach(function(edge) {
+    u = edge[0];
+    v = edge[1];
+
+    if (drawAll ||
+        (plottables.indexOf(u) !== -1 || plottables.indexOf(v) !== -1)) {
+
+      center = [(u.coordinates[x] + v.coordinates[x]) / 2,
+                (u.coordinates[y] + v.coordinates[y]) / 2,
+                is2D ? 0 : (u.coordinates[z] + v.coordinates[z]) / 2];
+
+      left = [u.coordinates[x], u.coordinates[y],
+              is2D ? 0 : u.coordinates[z]];
+      right = [v.coordinates[x], v.coordinates[y],
+               is2D ? 0 : v.coordinates[z]];
+
+      scope.lines.left.setLineAtIndex(j, left, center);
+      scope.lines.right.setLineAtIndex(j, right, center);
+    }
+
+    j++;
+  });
+
+  // otherwise the geometry will remain unchanged
+  this.lines.left.geometry.attributes.position.needsUpdate = true;
+  this.lines.right.geometry.attributes.position.needsUpdate = true;
+
+  this.needsUpdate = true;
 };
 
 /**
@@ -190,44 +344,7 @@ DecompositionView.prototype.changeVisibleDimensions = function(newDims) {
     }
   }
 
-  var x = this.visibleDimensions[0], y = this.visibleDimensions[1],
-      z = this.visibleDimensions[2], scope = this, changePosition,
-      hasConfidenceIntervals, radius = 0, is2D = (z === null);
-
-  hasConfidenceIntervals = this.decomp.hasConfidenceIntervals();
-
-  // we need the original radius to scale confidence intervals (if they exist)
-  if (hasConfidenceIntervals) {
-    radius = scope.ellipsoids[0].geometry.parameters.radius;
-  }
-
-  this.decomp.apply(function(plottable) {
-    mesh = scope.markers[plottable.idx];
-
-    // always use the original data plus the axis orientation
-    mesh.position.set(
-      plottable.coordinates[x] * scope.axesOrientation[0],
-      plottable.coordinates[y] * scope.axesOrientation[1],
-      (is2D ? 0 : plottable.coordinates[z]) * scope.axesOrientation[2]);
-    mesh.updateMatrix();
-
-    if (hasConfidenceIntervals) {
-      mesh = scope.ellipsoids[plottable.idx];
-
-      mesh.position.set(
-        plottable.coordinates[x] * scope.axesOrientation[0],
-        plottable.coordinates[y] * scope.axesOrientation[1],
-        (is2D ? 0 : plottable.coordinates[z]) * scope.axesOrientation[2]);
-
-      // flatten the ellipsoids ever so slightly
-      mesh.scale.set(plottable.ci[x] / radius, plottable.ci[y] / radius,
-                     is2D ? 0.01 : plottable.ci[z] / radius);
-
-      mesh.updateMatrix();
-    }
-  });
-
-  this.needsUpdate = true;
+  this.updatePositions();
 };
 
 /**
@@ -246,12 +363,6 @@ DecompositionView.prototype.flipVisibleDimension = function(index) {
   var localIndex = this.visibleDimensions.indexOf(index);
 
   if (localIndex !== -1) {
-    var x = this.visibleDimensions[0], y = this.visibleDimensions[1],
-        z = this.visibleDimensions[2], hasConfidenceIntervals,
-        is2D = (z === null);
-
-    hasConfidenceIntervals = scope.decomp.hasConfidenceIntervals();
-
     // update the ranges for this decomposition
     var max = this.decomp.dimensionRanges.max[index];
     var min = this.decomp.dimensionRanges.min[index];
@@ -261,29 +372,7 @@ DecompositionView.prototype.flipVisibleDimension = function(index) {
     // and update the state of the orientation
     this.axesOrientation[localIndex] *= -1;
 
-    this.decomp.apply(function(plottable) {
-      mesh = scope.markers[plottable.idx];
-
-      // always use the original data plus the axis orientation
-      mesh.position.set(
-        plottable.coordinates[x] * scope.axesOrientation[0],
-        plottable.coordinates[y] * scope.axesOrientation[1],
-        is2D ? 0 : plottable.coordinates[z] * scope.axesOrientation[2]);
-      mesh.updateMatrix();
-
-      if (hasConfidenceIntervals) {
-        mesh = scope.ellipsoids[plottable.idx];
-
-        // always use the original data plus the axis orientation
-        mesh.position.set(
-          plottable.coordinates[x] * scope.axesOrientation[0],
-          plottable.coordinates[y] * scope.axesOrientation[1],
-          is2D ? 0 : plottable.coordinates[z] * scope.axesOrientation[2]);
-        mesh.updateMatrix();
-      }
-    });
-
-    this.needsUpdate = true;
+    this.updatePositions();
   }
 };
 
@@ -332,25 +421,53 @@ DecompositionView.prototype.setCategory = function(attributes,
 
 /**
  *
- * Change the color for a set of plottables.
+ * Hide edges where plottables are present.
  *
- * @param {integer} color An RGB color in hexadecimal format.
- * @param {Plottable[]} group Array of Plottables that will change in color.
- *
+ * @param {Plottable[]} plottables An array of plottables for which the edges
+ * should be hidden. If this object is not supplied, all the edges are hidden.
  */
-DecompositionView.prototype.setGroupColor = function(color, group) {
-  var idx, scope = this, hasConfidenceIntervals;
+DecompositionView.prototype.hideEdgesForPlottables = function(plottables) {
+  // no edges to hide
+  if (this.decomp.edges.length === 0) {
+    return;
+  }
 
-  hasConfidenceIntervals = this.decomp.hasConfidenceIntervals();
+  var u, v, j = 0, hideAll, scope = this;
 
-  _.each(group, function(element) {
-    idx = element.idx;
-    scope.markers[idx].material.color = new THREE.Color(color);
+  hideAll = plottables === undefined;
 
-    if (hasConfidenceIntervals) {
-      scope.ellipsoids[idx].material.color = new THREE.Color(color);
+  this.decomp.edges.forEach(function(edge) {
+    u = edge[0];
+    v = edge[1];
+
+    if (hideAll ||
+        (plottables.indexOf(u) !== -1 || plottables.indexOf(v) !== -1)) {
+
+      scope.lines.left.setLineAtIndex(j, [0, 0, 0], [0, 0, 0]);
+      scope.lines.right.setLineAtIndex(j, [0, 0, 0], [0, 0, 0]);
     }
+    j++;
   });
+
+  // otherwise the geometry will remain unchanged
+  this.lines.left.geometry.attributes.position.needsUpdate = true;
+  this.lines.right.geometry.attributes.position.needsUpdate = true;
+};
+
+/**
+ *
+ * Hide edges where plottables are present.
+ *
+ * @param {Plottable[]} plottables An array of plottables for which the edges
+ * should be hidden. If this object is not supplied, all the edges are hidden.
+ */
+DecompositionView.prototype.showEdgesForPlottables = function(plottables) {
+  // no edges to show
+  if (this.decomp.edges.length === 0) {
+    return;
+  }
+
+  this._redrawEdges(plottables);
 };
 
   return DecompositionView;
